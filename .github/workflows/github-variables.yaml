@@ -18,7 +18,7 @@ jobs:
 
     - name: Get Pull Request Info
       env:
-        GH_TOKEN: ${{ secrets.GIT_TOKEN }}
+        GH_TOKEN: ${{ secrets.token }}
       run: |
         BRANCH_NAME="${{ github.ref}}"
         
