@@ -4,34 +4,26 @@ on:
   push:
     branches:
       - main
-
 jobs:
-  PullRequestVariables:
+  pr-number:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
-    - name: Check out code
-      uses: actions/checkout@v3
-
-    - name: Set up GitHub CLI
-      run: |
-        sudo apt-get install -y gh
-
-    - name: Get Pull Request Info
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        BRANCH_NAME="${{ github.ref}}"
-        
-        # Get the pull request details using the branch name
-        PR_DATA=$(gh pr list --head "$BRANCH_NAME" --json title,author,headRefName --jq '.[]')
-        
-        # Extract title, committer (author), and branch name
-        PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
-        COMMITTER_NAME=$(echo "$PR_DATA" | jq -r '.author.login')
-        BRANCH_NAME=$(echo "$PR_DATA" | jq -r '.headRefName')
-        
-        echo "Pull Request Title: $PR_TITLE"
-        echo "Committer Name: $COMMITTER_NAME"
-        echo "Branch Name: $BRANCH_NAME"
-        
-        # You can now use these variables as needed
+      - uses: actions/github-script@v7
+        id: get_pr_data
+        with:
+          script: |
+            return (
+              await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                commit_sha: context.sha,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              })
+            ).data[0];
+      - name: Pull Request data
+        run: |
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
+          printf '%s\n' "${{ fromJson(steps.get_pr_data.outputs.result) }}"
