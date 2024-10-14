@@ -26,6 +26,9 @@ jobs:
           # Get the branch name
           BRANCH_NAME="${{ github.ref }}"
           
+          # Debug: print the branch name
+          echo "Branch name extracted: $BRANCH_NAME"
+          
           # Query GitHub API to find the PR associated with the branch
           PR_RESPONSE=$(curl -s \
             -H "Authorization: token ${{env.GITHUB_TOKEN}}" \
