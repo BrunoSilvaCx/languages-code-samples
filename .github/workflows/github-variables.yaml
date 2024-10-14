@@ -9,10 +9,25 @@ jobs:
   PullRequestVariables:
     runs-on: ubuntu-latest
     steps:
-      - name: Print pull request info
+      ## - name: Print pull request info
+      ##   run: |
+      ##     echo "Title: ${{ github.event.pull_request.title }}"
+      ##     echo "Commiter Name: ${{ github.event.pull_request.user.login }}"
+      ##     echo "Component Name: ${{ github.event.repository.name }}"
+      ##     echo "Branch Name: ${{ github.ref#refs/heads/ }}"
+      ##     echo "Commit SHA: ${{ github.sha }}"
+      - uses: actions/github-script@v6
+        id: get_pr_data
+        with:
+          script: |
+            return (
+              await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                commit_sha: context.sha,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              })
+            ).data[0];
+      - name: Pull Request data
         run: |
-          echo "Title: ${{ github.event.pull_request.title }}"
-          echo "Commiter Name: ${{ github.event.pull_request.user.login }}"
-          echo "Component Name: ${{ github.event.repository.name }}"
-          echo "Branch Name: ${{ github.event.pull_request.base.ref }}"
-          echo "Commit SHA: ${{ github.sha }}"
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
