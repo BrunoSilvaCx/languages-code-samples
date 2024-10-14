@@ -15,7 +15,7 @@ jobs:
         id: get_pr_data
         with:
           script: |
-            console.log (
+            return (
               await github.rest.repos.listPullRequestsAssociatedWithCommit({
                 commit_sha: context.sha,
                 owner: context.repo.owner,
@@ -23,8 +23,16 @@ jobs:
               })
             ).data[0];
 
-     # - name: Pull Request data
-     #   run: |
-     #     echo "${{steps.set-result.outputs.result}}"
-     #     echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
-     #     echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
+      - name: Pull Request data
+        run: |
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).user.name }}'
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).user.login }}'
+          echo '${{ fromJson(steps.get_pr_data.outputs.result).html_url }}'
+          JIRA_TICKET=$(echo ${{ fromJson(steps.get_pr_data.outputs.result).title }} | grep -oE "(^[A-Z]+-[0-9]+(,{1}[A-Z]+-[0-9]+)*|(\(|\[)[A-Z]+-[0-9]+(,{1}[A-Z]+-[0-9]+)*(\)|\])$)" | tr -d '()[]' | head -n1 || true)
+          if [ -z "$JIRA_TICKET" ]; then
+            echo "No JIRA ticket found in the PR title. Setting default value AST-000"
+            JIRA_TICKET="AST-000"
+          fi
+          echo $JIRA_TICKET
