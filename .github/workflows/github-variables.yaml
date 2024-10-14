@@ -15,13 +15,14 @@ jobs:
         id: get_pr_data
         with:
           script: |
+            console.log(
             return (
               await github.rest.repos.listPullRequestsAssociatedWithCommit({
                 commit_sha: context.sha,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               })
-            ).data[0];
+            ).data[0].head;)
 
       - name: Pull Request data
         run: |
