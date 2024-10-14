@@ -22,9 +22,7 @@ jobs:
                 repo: context.repo.repo,
               })
             ).data[0];
-
-      - name: Install jq
-        run: sudo apt-get install jq
+          result-encoding: string
 
       - name: Pull Request data
         run: | 
