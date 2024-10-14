@@ -15,14 +15,14 @@ jobs:
         id: get_pr_data
         with:
           script: |
-            console.log(
             return (
               await github.rest.repos.listPullRequestsAssociatedWithCommit({
                 commit_sha: context.sha,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               })
-            ).data[0].head;)
+            ).data[0];
+            console.log(${{ fromJson(steps.get_pr_data.outputs.result).head }})
 
       - name: Pull Request data
         run: |
@@ -31,6 +31,7 @@ jobs:
           echo '${{ fromJson(steps.get_pr_data.outputs.result).user.login }}'
           echo '${{ fromJson(steps.get_pr_data.outputs.result).html_url }}'
           echo '${{ fromJson(steps.get_pr_data.outputs.result).head.ref }}'
+          
           JIRA_TICKET=$(echo ${{ fromJson(steps.get_pr_data.outputs.result).title }} | grep -oE "(^[A-Z]+-[0-9]+(,{1}[A-Z]+-[0-9]+)*|(\(|\[)[A-Z]+-[0-9]+(,{1}[A-Z]+-[0-9]+)*(\)|\])$)" | tr -d '()[]' | head -n1 || true)
           if [ -z "$JIRA_TICKET" ]; then
             echo "No JIRA ticket found in the PR title. Setting default value AST-000"
