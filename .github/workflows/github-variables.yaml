@@ -28,7 +28,7 @@ jobs:
           
           # Query GitHub API to find the PR associated with the branch
           PR_RESPONSE=$(curl -s \
-            -H "Authorization: token ${{GITHUB_TOKEN}}" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
             "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ github.repository_owner }}:$BRANCH_NAME")
           
           # Extract the first PR in the list (assuming only one open PR for this branch)
