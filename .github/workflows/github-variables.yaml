@@ -27,7 +27,7 @@ jobs:
         run: sudo apt-get install jq
 
       - name: Pull Request data
-        run: |
+        run: | 
+          echo "${{steps.set-result.outputs.result}}"
           echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
           echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
-          echo "${{ fromJson(steps.get_pr_data.outputs.result) }}" | jq '.'
