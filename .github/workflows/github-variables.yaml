@@ -28,7 +28,7 @@ jobs:
 
       - name: Pull Request data
         run: |
-          JSON_DATA=$(${{ fromJson(steps.get_pr_data.outputs.result) }})
+          JSON_DATA=${{ fromJson(steps.get_pr_data.outputs.result) }}
           echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
           echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
           echo "$JSON_DATA" | jq '.'
