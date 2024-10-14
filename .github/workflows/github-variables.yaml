@@ -9,38 +9,29 @@ jobs:
   PullRequestVariables:
     runs-on: ubuntu-latest
     steps:
-      ## - name: Print pull request info
-      ##   run: |
-      ##     echo "Title: ${{ github.event.pull_request.title }}"
-      ##     echo "Commiter Name: ${{ github.event.pull_request.user.login }}"
-      ##     echo "Component Name: ${{ github.event.repository.name }}"
-      ##     echo "Branch Name: ${{ github.ref#refs/heads/ }}"
-      ##     echo "Commit SHA: ${{ github.sha }}"
-      - name: Check out code
-        uses: actions/checkout@v3
+    - name: Check out code
+      uses: actions/checkout@v3
 
-      - name: Get Pull Request Info
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Get the branch name
-          BRANCH_NAME="${{ github.ref }}"
-          
-          # Debug: print the branch name
-          echo "Branch name extracted: $BRANCH_NAME"
-          
-          # Query GitHub API to find the PR associated with the branch
-          PR_RESPONSE=$(curl -s \
-            -H "Authorization: token ${{env.GITHUB_TOKEN}}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ github.repository_owner }}:$BRANCH_NAME")
-          
-          echo "PR Response: $PR_RESPONSE"
-          
-          # Extract the first PR in the list (assuming only one open PR for this branch)
-          PR_TITLE=$(echo "$PR_RESPONSE" | jq -r '.[0].title')
-          COMMITTER_NAME=$(echo "$PR_RESPONSE" | jq -r '.[0].user.login')
-          BRANCH_NAME=$(echo "$PR_RESPONSE" | jq -r '.[0].head.ref')
-                    
-          echo "Pull Request Title: $PR_TITLE"
-          echo "Committer Name: $COMMITTER_NAME"
-          echo "Branch Name: $BRANCH_NAME"
+    - name: Set up GitHub CLI
+      run: |
+        sudo apt-get install -y gh
+
+    - name: Get Pull Request Info
+      env:
+        GH_TOKEN: ${{ secrets.GIT_TOKEN }}
+      run: |
+        BRANCH_NAME="${{ github.ref}}"
+        
+        # Get the pull request details using the branch name
+        PR_DATA=$(gh pr list --head "$BRANCH_NAME" --json title,author,headRefName --jq '.[]')
+        
+        # Extract title, committer (author), and branch name
+        PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
+        COMMITTER_NAME=$(echo "$PR_DATA" | jq -r '.author.login')
+        BRANCH_NAME=$(echo "$PR_DATA" | jq -r '.headRefName')
+        
+        echo "Pull Request Title: $PR_TITLE"
+        echo "Committer Name: $COMMITTER_NAME"
+        echo "Branch Name: $BRANCH_NAME"
+        
+        # You can now use these variables as needed
