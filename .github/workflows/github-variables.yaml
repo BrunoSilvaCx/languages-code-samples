@@ -22,7 +22,6 @@ jobs:
                 repo: context.repo.repo,
               })
             ).data[0];
-            console.log(${{ fromJson(steps.get_pr_data.outputs.result).head }})
 
       - name: Pull Request data
         run: |
